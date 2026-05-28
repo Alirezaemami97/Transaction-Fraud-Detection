@@ -1,0 +1,31 @@
+data:
+  transaction_path: "data/raw/train_transaction.csv"
+  identity_path: "data/raw/train_identity.csv"
+  train_cutoff_days: 60        # transactions before this day index go to train
+  target_column: "isFraud"
+
+features:
+  numeric_fill_value: -999     # sentinel for missing numerics
+  cat_fill_value: "missing"    # sentinel for missing categoricals
+
+training:
+  random_seed: 42
+  test_size: 0.2               # fraction of post-cutoff data held out
+  lgbm:
+    n_estimators: 500
+    learning_rate: 0.05
+    num_leaves: 63
+    scale_pos_weight: 28       # approx ratio of negatives to positives (handles imbalance)
+
+evaluation:
+  fp_cost: 10                  # business cost of a false positive (blocked legit order)
+  fn_cost: 100                 # business cost of a false negative (missed fraud)
+
+mlflow:
+  experiment_name: "fraud-detection"
+  model_name: "fraud-lgbm"
+
+serving:
+  host: "0.0.0.0"
+  port: 8000
+  model_stage: "Production"

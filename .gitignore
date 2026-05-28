@@ -1,0 +1,39 @@
+# --- Guidance / AI assistant files (local only) ---
+CLAUDE.md
+docs/DESIGN.md
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- Poetry ---
+# poetry.lock is intentionally committed (pins exact deps for reproducibility)
+
+# --- Data (raw CSVs are not committed — too large) ---
+data/
+
+# --- MLflow tracking ---
+mlruns/
+mlartifacts/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- OS / editor noise ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
