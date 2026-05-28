@@ -22,7 +22,7 @@ env/
 # poetry.lock is intentionally committed (pins exact deps for reproducibility)
 
 # --- Data (raw CSVs are not committed — too large) ---
-data/
+/data/
 
 # --- MLflow tracking ---
 mlruns/
