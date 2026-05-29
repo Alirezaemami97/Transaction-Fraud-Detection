@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+
 from fraud_detection.data.schema import validate_schema
 
 
