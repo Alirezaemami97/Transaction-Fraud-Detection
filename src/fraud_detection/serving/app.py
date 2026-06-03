@@ -72,7 +72,7 @@ def create_app(
             cfg = load_config(repo_root / "config/config.yaml")
             app.state.config = cfg
             app.state.model = mlflow.lightgbm.load_model(
-                f"models:/{cfg.mlflow.model_name}/latest"
+                f"models:/{cfg.mlflow.model_name}/{cfg.mlflow.model_stage}"
             )
             # Load the feature schema logged during training so we can build
             # full-width feature vectors from partial transaction payloads.

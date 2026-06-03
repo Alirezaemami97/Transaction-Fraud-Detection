@@ -37,12 +37,12 @@ class EvaluationConfig(BaseModel):
 class MLflowConfig(BaseModel):
     experiment_name: str
     model_name: str
+    model_stage: str = "latest"
 
 
 class ServingConfig(BaseModel):
     host: str
     port: int
-    model_stage: str
     decision_threshold: float
 
 

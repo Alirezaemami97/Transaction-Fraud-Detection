@@ -57,7 +57,6 @@ def _make_config(threshold: float = 0.5) -> Config:
         serving=ServingConfig(
             host="0.0.0.0",
             port=8000,
-            model_stage="None",
             decision_threshold=threshold,
         ),
     )

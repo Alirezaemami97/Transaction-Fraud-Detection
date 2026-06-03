@@ -34,7 +34,7 @@ The **feature pipeline is shared** between training and serving — the exact sa
 
 ## Stack
 
-Python 3.12 · Poetry · LightGBM · scikit-learn (Isolation Forest) · Pydantic · MLflow · FastAPI · Docker · GitHub Actions
+Python 3.12 · Poetry · LightGBM · scikit-learn (Isolation Forest) · Pydantic · MLflow · FastAPI · Docker · GitHub Actions · Evidently *(drift monitoring — M6, planned)*
 
 ## Project structure
 
@@ -220,3 +220,4 @@ To retrain with different hyperparameters, edit `config.yaml` and re-run `train.
 - [x] M3 — Training pipeline + MLflow + model registry
 - [x] M4 — Evaluation panel + cost-based threshold + fairness check + Isolation Forest
 - [x] M5 — FastAPI serving + prediction logging + Dockerfile wired
+- [ ] M6 — Input drift monitoring with Evidently (reference vs. recent predictions)
