@@ -43,6 +43,7 @@ class ServingConfig(BaseModel):
     host: str
     port: int
     model_stage: str
+    decision_threshold: float
 
 
 class Config(BaseModel):

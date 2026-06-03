@@ -29,3 +29,4 @@ serving:
   host: "0.0.0.0"
   port: 8000
   model_stage: "Production"
+  decision_threshold: 0.408     # cost-optimal threshold from M4 evaluation

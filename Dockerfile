@@ -29,6 +29,4 @@ RUN pip install --no-deps -e .
 
 EXPOSE 8000
 
-# TODO M5: replace with real serving entrypoint once FastAPI app is built
-# CMD ["uvicorn", "fraud_detection.serving.app:app", "--host", "0.0.0.0", "--port", "8000"]
-CMD ["python", "-c", "print('Serving app not yet implemented — coming in M5')"]
+CMD ["uvicorn", "fraud_detection.serving.app:app", "--host", "0.0.0.0", "--port", "8000"]
