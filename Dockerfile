@@ -24,8 +24,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY src/ src/
 COPY config/ config/
 
-# Install the package itself (no deps — already in venv)
-RUN pip install --no-deps -e .
+# Make the fraud_detection package importable without a pip install step.
+# The venv already has all deps; adding src/ to PYTHONPATH is enough.
+ENV PYTHONPATH=/app/src
 
 EXPOSE 8000
 
