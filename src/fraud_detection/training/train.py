@@ -4,6 +4,7 @@ Run with:
     poetry run python -m fraud_detection.training.train
 """
 
+import json
 import logging
 from pathlib import Path
 
@@ -97,6 +98,17 @@ def run_training(config: Config, repo_root: Path) -> str:
             artifact_path="model",
             registered_model_name=config.mlflow.model_name,
         )
+
+        # Log feature schema so the serving app can reconstruct full-width
+        # feature vectors from partial transaction payloads.
+        schema = {
+            "feature_names": X_train.columns.tolist(),
+            "cat_features": X_train.select_dtypes("category").columns.tolist(),
+        }
+        schema_file = Path("feature_schema.json")
+        schema_file.write_text(json.dumps(schema))
+        mlflow.log_artifact(str(schema_file), artifact_path="schema")
+        schema_file.unlink()
 
         run_id: str = run.info.run_id
         logger.info(

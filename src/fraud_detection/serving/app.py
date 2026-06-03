@@ -7,12 +7,15 @@ Docker:
     docker run -p 8000:8000 fraud-detection
 """
 
+import json
 import logging
 import time
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
+import mlflow
 import mlflow.lightgbm
 import pandas as pd
 from fastapi import FastAPI, Request
@@ -49,6 +52,7 @@ def create_app(
     config: Config | None = None,
     model: object | None = None,
     log_path: Path = _DEFAULT_LOG_PATH,
+    feature_schema: dict[str, Any] | None = None,
 ) -> FastAPI:
     """Build the FastAPI application.
 
@@ -61,6 +65,8 @@ def create_app(
         if config is not None and model is not None:
             app.state.config = config
             app.state.model = model
+            # Tests inject an empty schema; the fake model ignores column shape.
+            app.state.feature_schema = feature_schema or {"feature_names": [], "cat_features": []}
         else:
             repo_root = Path(__file__).parents[3]
             cfg = load_config(repo_root / "config/config.yaml")
@@ -68,6 +74,16 @@ def create_app(
             app.state.model = mlflow.lightgbm.load_model(
                 f"models:/{cfg.mlflow.model_name}/latest"
             )
+            # Load the feature schema logged during training so we can build
+            # full-width feature vectors from partial transaction payloads.
+            client = mlflow.MlflowClient()
+            versions = client.search_model_versions(f"name='{cfg.mlflow.model_name}'")
+            run_id: str = max(versions, key=lambda v: int(v.version)).run_id
+            schema_local = mlflow.artifacts.download_artifacts(
+                artifact_uri=f"runs:/{run_id}/schema/feature_schema.json"
+            )
+            with open(schema_local) as f:
+                app.state.feature_schema = json.load(f)
         app.state.log_path = log_path
         yield
 
@@ -94,10 +110,31 @@ def create_app(
         sentinels by build_features() — the same logic used at training time.
         """
         cfg: Config = request.app.state.config
+        schema: dict[str, Any] = request.app.state.feature_schema
+        feature_names: list[str] = schema["feature_names"]
+        cat_features: set[str] = set(schema["cat_features"])
 
-        # Build a one-row DataFrame from the transaction dict
-        df = pd.DataFrame([body.transaction])
+        if feature_names:
+            # Build a full-width row: fill every expected column with the
+            # appropriate sentinel, then override with the provided fields.
+            # This ensures LightGBM sees the same categorical structure as training.
+            full_tx: dict[str, Any] = {
+                col: (
+                    cfg.features.cat_fill_value
+                    if col in cat_features
+                    else cfg.features.numeric_fill_value
+                )
+                for col in feature_names
+            }
+            full_tx.update({k: v for k, v in body.transaction.items() if k in set(feature_names)})
+            df = pd.DataFrame([full_tx])
+        else:
+            # Test path: no schema injected, use the transaction directly.
+            df = pd.DataFrame([body.transaction])
+
         X = build_features(df, cfg.features)
+        if feature_names:
+            X = X[feature_names]  # enforce training column order
 
         fraud_score: float = float(
             request.app.state.model.predict_proba(X)[:, 1][0]
